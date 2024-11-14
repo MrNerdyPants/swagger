@@ -1,0 +1,1899 @@
+openapi: 3.0.1
+info:
+  title: Swagger Notification Microservice - OpenAPI 3.0
+  description: |
+    # Notification Microservice
+
+    This microservice is designed for managing various types of notifications, including emails, SMS, and push notifications. Its primary responsibilities include:
+
+    - **CRUD Operations**: Performing Create, Read, Update, and Delete operations for notifications and their types.
+    - **Notification Delivery**: Sending notifications to clients in real-time.
+    - **Scheduling**: Allowing users to schedule notifications for future delivery.
+
+    Additionally, the service supports user grouping, enabling the sending of different notifications to different user groups. It uses configurable templates to standardize notifications, enhancing the reusability of content across multiple scheduling jobs and notification types.
+
+    ## Key Features
+
+    - **Group Management**: Users can be organized into groups, facilitating targeted notifications.
+    - **Configurable Templates**: Templates can be customized to create a consistent structure for notifications, ensuring efficiency and reusability.
+    - **Multi-Channel Support**: Capable of handling various notification channels, including email, SMS, and push notifications.
+    - **Scheduling Capabilities**: Notifications can be scheduled for future dates and times, improving flexibility and timing.
+
+    By using this service, you can streamline your notification management processes, ensuring that the right message reaches the right audience at the right time.
+
+    ## Technologies
+
+    - **Spring Boot**: Framework for building Java applications.
+    - **Firebase Cloud Messaging**: Service for sending push notifications.
+    - **Apache Kafka**: Distributed event streaming platform.
+    - **Twilio API**: Communication API for SMS and voice.
+    - **JavaMail Service**: API for sending email.
+    - **Thymeleaf Template Engine**: Template engine for web and email templates.
+
+    ## Useful Links
+
+    - [The Dot Notification repository](https://bitbucket.org/segmateksoftware/dotnotification)
+    - [The source API definition for the Notification Microservice](#)
+  version: 1.0.0
+servers:
+  #  - url: https://demo.sigmamea.com/dotnotification/
+  - url: http://localhost:8081/
+    description: Generated server url
+tags:
+  - name: FCM Notification Controller
+    description: Controller for FCM Notifications Operations
+  - name: Template Controller
+    description: Controller for Template Management Operations
+  - name: Notification Controller
+    description: Controller for Notifications Detail Operations
+  - name: Scheduler Notification Controller
+    description: Controller for Notification Scheduling Operations
+  - name: Email Controller
+    description: Controller for email notification operations
+  - name: Message Controller
+    description: Controller for SMS Notification Operations
+  - name: Notification History Controller
+    description: Controller for Notification History Operations
+  - name: Cache Config Controller
+    description: Controller for Cache Config Operations
+paths:
+  /template/update/{id}:
+    put:
+      tags:
+        - Template Controller
+      summary: Updates Templates
+      description: This endpoint is responsible for templates by id.
+      operationId: updateTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateDTO'
+        required: true
+      responses:
+        '200':
+          description: Success Status with updated Template
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 799
+                templateName: template 799
+                template: Sample Request Body
+                notificationType: EMAIL
+                timestamp: '2022-06-24T10:52:36.906488'
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Exception in updating resource: {error message  here}
+  /scheduling/{id}:
+    get:
+      tags:
+        - Scheduler Notification Controller
+      summary: Get Scheduled Notification by Id
+      description: This endpoint is responsible for getting scheduled notifications by id.
+      operationId: getNotificationById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success Status with Scheduled Notifications entity
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 152
+                timestamp: '2024-06-24T10:52:36.906488'
+                group: group7
+                templateName: template1
+                templatePlaceHolders: null
+                active: true
+                notificationType: EMAIL
+                notificationIsExecuted: false
+                executionTime: 2 * * * * ?
+                notificationIsRecursive: true
+                subject: Sample Mail
+                attachement: C:\Projects\Dot-Project\files\scheduled\attachements\f612d11b-9886-4e7b-84c6-74d0d4b188dd.pdf,C:\Projects\Dot-Project\files\scheduled\attachements\19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                attachmentName: Design Patterns.pdf,Mediator.pdf
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        No Notification Found with id: {id}
+    put:
+      tags:
+        - Scheduler Notification Controller
+      summary: Update Scheduled Notification
+      description: This endpoint is responsible for updating a scheduled notification.
+      operationId: updateNotification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduledNotification'
+        required: true
+      responses:
+        '200':
+          description: Success Status
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 152
+                timestamp: '2024-06-24T10:52:36.906488'
+                group: group7
+                templateName: template2
+                templatePlaceHolders: null
+                active: true
+                notificationType: EMAIL
+                notificationIsExecuted: false
+                executionTime: 5 * * * * ?
+                notificationIsRecursive: true
+                subject: Sample Mail
+                attachement: C:\Projects\Dot-Project\files\scheduled\attachements\f612d11b-9886-4e7b-84c6-74d0d4b188dd.pdf,C:\Projects\Dot-Project\files\scheduled\attachements\19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                attachmentName: Design Patterns.pdf,Mediator.pdf
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Exception Status.
+          content:
+            text/plain:
+              schema:
+                type: string
+    delete:
+      tags:
+        - Scheduler Notification Controller
+      summary: Delete Scheduled Notification
+      description: This endpoint is responsible for deleting Scheduled Notification.
+      operationId: deleteNotification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Success Status
+          content:
+            '*/*':
+              schema:
+                type: object
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error deleting Scheduling Notification: {error message  here}
+  /fcm/token/update/{id}:
+    put:
+      tags:
+        - FCM Notification Controller
+      summary: Update FCM Token
+      description: This endpoint is responsible for updating FCM token.
+      operationId: updateToken
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FcmTokenDTO'
+        required: true
+      responses:
+        '200':
+          description: Success Status with updated entity as response
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 6
+                msisdn: 436-934-3768
+                token: HHy5zlMI5MYPlfo
+                active: true
+                timestamp: '2024-06-23T12:16:23.717645'
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error updating: {error message  here}
+  /cache/configs/{id}:
+    get:
+      tags:
+        - Cache Config Controller
+      summary: Cache Config by Id
+      description: This endpoint is responsible for getting Cache Config by Id.
+      operationId: getCacheConfigById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CacheConfig'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - Cache Config Controller
+      summary: Update Cache Config
+      description: This endpoint is responsible for updating Cache Config by id.
+      operationId: updateCacheConfig
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CacheConfig'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CacheConfig'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Cache Config Controller
+      summary: Delete Cache Config
+      description: This endpoint is responsible for deleting Cache Config by Id.
+      operationId: deleteCacheConfig
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+  /template/save:
+    post:
+      tags:
+        - Template Controller
+      summary: Save Template
+      description: This endpoint is responsible for saving Template.
+      operationId: saveTemplate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateDTO'
+        required: true
+      responses:
+        '201':
+          description: Success Status with saved Template
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 12
+                templateName: template 12
+                template: Sample Request Body
+                notificationType: EMAIL
+                timestamp: '2022-06-24T10:52:36.906488'
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error saving Template: {error message  here}
+  /sms/send:
+    post:
+      tags:
+        - Message Controller
+      summary: send SMS
+      description: This endpoints sends SMS notification.
+      operationId: sendSMS
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SMSRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: Success Status
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Sending SMS
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Exception on sendSMS: {error message here}
+  /scheduling:
+    get:
+      tags:
+        - Scheduler Notification Controller
+      summary: Get All Scheduled Notification
+      description: This endpoint is responsible for getting all scheduled notifications by page.
+      operationId: getAllNotifications
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Success Status with Scheduled Notification page
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                - id: 151
+                  timestamp: '2024-06-24T10:52:36.906488'
+                  group: group6
+                  templateName: template
+                  templatePlaceHolders: null
+                  active: true
+                  notificationType: EMAIL
+                  notificationIsExecuted: false
+                  executionTime: 2 * * * * ?
+                  notificationIsRecursive: true
+                  subject: Sample Mail
+                  attachement: C:\Projects\Dot-Project\files\scheduled\attachements\f612d11b-9886-4e7b-84c6-74d0d4b188dd.pdf,C:\Projects\Dot-Project\files\scheduled\attachements\19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                  attachmentName: Design Patterns.pdf,Mediator.pdf
+                - id: 152
+                  timestamp: '2024-06-24T10:52:36.906488'
+                  group: group7
+                  templateName: template1
+                  templatePlaceHolders: null
+                  active: true
+                  notificationType: EMAIL
+                  notificationIsExecuted: false
+                  executionTime: 2 * * * * ?
+                  notificationIsRecursive: true
+                  subject: Sample Mail
+                  attachement: C:\Projects\Dot-Project\files\scheduled\attachements\f612d11b-9886-4e7b-84c6-74d0d4b188dd.pdf,C:\Projects\Dot-Project\files\scheduled\attachements\19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                  attachmentName: Design Patterns.pdf,Mediator.pdf
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Scheduler Notification Controller
+      summary: Add Scheduled Notification
+      description: This endpoint is responsible for adding a notification of any type.
+      operationId: addNotification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduledNotification'
+        required: true
+      responses:
+        '201':
+          description: Success Status with updated scheduled notification entity
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 151
+                timestamp: '2024-06-24T10:52:36.906488'
+                group: group6
+                templateName: template
+                templatePlaceHolders: null
+                active: true
+                notificationType: EMAIL
+                notificationIsExecuted: false
+                executionTime: 2 * * * * ?
+                notificationIsRecursive: true
+                subject: Sample Mail
+                attachement: C:\Projects\Dot-Project\files\scheduled\attachements\f612d11b-9886-4e7b-84c6-74d0d4b188dd.pdf,C:\Projects\Dot-Project\files\scheduled\attachements\19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                attachmentName: Design Patterns.pdf,Mediator.pdf
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        {error message  here}
+  /scheduling/schedule:
+    post:
+      tags:
+        - Scheduler Notification Controller
+      summary: Schedule Notification
+      description: This endpoint is responsible for scheduling a notification.
+      operationId: scheduleNotification
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - notification
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                notification:
+                  $ref: '#/components/schemas/ScheduledNotificationDTO'
+      responses:
+        '200':
+          description: Success Status
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Notification scheduled successfully
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error scheduling notification: {error message  here}
+  /fcm/token/save:
+    post:
+      tags:
+        - FCM Notification Controller
+      summary: Save FCM Token
+      description: This endpoint is responsible for saving FCM token.
+      operationId: saveToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FcmTokenDTO'
+        required: true
+      responses:
+        '200':
+          description: Success Status with updated entity sent as response
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 8
+                msisdn: 844-799-3758
+                token: pFVA2E49usD70DP
+                active: true
+                timestamp: '2024-06-23T12:16:25.780158'
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |
+                Error saving FCM {error message}
+  /fcm/send:
+    post:
+      tags:
+        - FCM Notification Controller
+      summary: Send FCM Notification
+      description: This endpoint is responsible for sending FCM Notification.
+      operationId: sendTokenNotification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FCMNotificationRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: Success Status
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Sending PUSH Notifications ...
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error sending FCM: {error message here}
+  /email/send:
+    post:
+      tags:
+        - Email Controller
+      summary: Send Email
+      description: This endpoint is responsible for sending emails in one go.
+      operationId: sendEmailToGroupOrCondition
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailNotificationDTO'
+        required: true
+      responses:
+        '200':
+          description: Success Status
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Sending Emails ...
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Exception while sending email: {error here}
+  /email/notify/send:
+    post:
+      tags:
+        - Email Controller
+      summary: Send Login Notification
+      description: This endpoint is responsible for sending emails in one go.
+      operationId: sendLoginNotification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailNotificationDTO'
+        required: true
+      responses:
+        '200':
+          description: Success Status
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Sending Emails ...
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Exception while sending email: {error here}
+  /cache/configs:
+    get:
+      tags:
+        - Cache Config Controller
+      summary: All Cache Config
+      description: This endpoint is responsible for getting all Cache Configs.
+      operationId: getAllCacheConfigs
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                example:
+                  - id: 0
+                    name: string
+                    duration: string
+                    microservice: string
+                    timestamp: "2024-08-05T08:38:48.416Z"
+
+                  - id: 1
+                    name: string
+                    duration: string
+                    microservice: string
+                    timestamp: "2024-08-05T08:38:48.416Z"
+
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Cache Config Controller
+      summary: Create New Cache Config
+      description: This endpoint is responsible for creating Cache Config.
+      operationId: createCacheConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CacheConfig'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CacheConfig'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+  /template:
+    get:
+      tags:
+        - Template Controller
+      summary: Get All Templates
+      description: This endpoint is responsible for all Templates by page.
+      operationId: getAllTemplates
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Success Status with list of Templates
+          content:
+            application/json:
+              schema:
+                type: object
+              example: |
+                [
+                  {
+                    "id": 1,
+                    "templateName": "template1",
+                    "template": "Sample Request Body",
+                    "notificationType": "EMAIL",
+                    "timestamp": "2024-06-24T10:52:36.906488"
+                  },
+                  {
+                    "id": 2,
+                    "templateName": "template2",
+                    "template": "Sample Request Body for Testing",
+                    "notificationType": "EMAIL",
+                    "timestamp": "2024-07-24T10:52:36.906488"
+                  },
+                ]
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Exception in getting Templates: {error message  here}
+  /template/{id}:
+    get:
+      tags:
+        - Template Controller
+      summary: Get Templates By Id
+      description: This endpoint is responsible for getting Templates by Id.
+      operationId: getTemplateById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success Status
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 1
+                templateName: template1
+                template: Sample Request Body
+                notificationType: EMAIL
+                timestamp: '2024-06-24T10:52:36.906488'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Exception Status
+          content:
+            text/plain:
+              schema:
+                type: string
+    delete:
+      tags:
+        - Template Controller
+      summary: Delete Template
+      description: This endpoint is responsible for deleting Template by id.
+      operationId: deleteTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: No Content Status
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Template not found with id: {error message  here}
+  /template/query:
+    get:
+      tags:
+        - Template Controller
+      summary: Search Templates by Specific Fields
+      description: This endpoint is responsible for getting all templates by specific attributes in the search specification.
+      operationId: getAll
+      parameters:
+        - name: spec
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/SpecificationTemplate'
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Success Status with list of Templates
+          content:
+            application/json:
+              schema:
+                type: object
+              example: |-
+                [
+                    {
+                        "id": 280,
+                        "templateName": "template 280",
+                        "template": "Sample Request Body",
+                        "notificationType": "EMAIL",
+                        "timestamp": "2022-02-24T10:52:36.906488"
+                    },
+                    {
+                    "id": 291,
+                    "templateName": "template 291",
+                    "template": "Sample Request Body",
+                    "notificationType": "EMAIL",
+                    "timestamp": "2022-06-24T10:52:36.906488"
+                  },
+                  {
+                    "id": 799,
+                    "templateName": "template 799",
+                    "template": "Sample Request Body",
+                    "notificationType": "EMAIL",
+                    "timestamp": "2022-06-24T10:52:36.906488"
+                  },
+                ]
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+  /template/query/all:
+    get:
+      tags:
+        - Template Controller
+      summary: Search Templates
+      description: This endpoint is responsible for getting all templates by search specification.
+      operationId: search
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success Status with list of Templates
+          content:
+            application/json:
+              schema:
+                type: object
+              example: |-
+                [
+                    {
+                        "id": 80,
+                        "templateName": "template 280",
+                        "template": "Sample Request Body",
+                        "notificationType": "EMAIL",
+                        "timestamp": "2022-02-24T10:52:36.906488"
+                    },
+                    {
+                    "id": 91,
+                    "templateName": "template 291",
+                    "template": "Sample Request Body",
+                    "notificationType": "EMAIL",
+                    "timestamp": "2022-06-24T10:52:36.906488"
+                  },
+                  {
+                    "id": 99,
+                    "templateName": "template 799",
+                    "template": "Sample Request Body",
+                    "notificationType": "EMAIL",
+                    "timestamp": "2022-06-24T10:52:36.906488"
+                  },
+                ]
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Exception in getting Templates: {error message  here}
+  /scheduling/query:
+    get:
+      tags:
+        - Scheduler Notification Controller
+      summary: Search Scheduled Notifications
+      description: This endpoint is responsible for getting Scheduled Notifications by search specification.
+      operationId: search_1
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success Status with list of Scheduled Notifications
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                - id: 151
+                  timestamp: '2024-06-24T10:52:36.906488'
+                  group: group6
+                  templateName: template
+                  templatePlaceHolders: null
+                  active: true
+                  notificationType: EMAIL
+                  notificationIsExecuted: false
+                  executionTime: 2 * * * * ?
+                  notificationIsRecursive: true
+                  subject: Sample Mail
+                  attachement: C:\Projects\Dot-Project\files\scheduled\attachements\f612d11b-9886-4e7b-84c6-74d0d4b188dd.pdf,C:\Projects\Dot-Project\files\scheduled\attachements\19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                  attachmentName: Design Patterns.pdf,Mediator.pdf
+                - id: 152
+                  timestamp: '2024-06-24T10:52:36.906488'
+                  group: group7
+                  templateName: template1
+                  templatePlaceHolders: null
+                  active: true
+                  notificationType: EMAIL
+                  notificationIsExecuted: false
+                  executionTime: 2 * * * * ?
+                  notificationIsRecursive: true
+                  subject: Sample Mail
+                  attachement: C:\Projects\Dot-Project\files\scheduled\attachements\f612d11b-9886-4e7b-84c6-74d0d4b188dd.pdf,C:\Projects\Dot-Project\files\scheduled\attachements\19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                  attachmentName: Design Patterns.pdf,Mediator.pdf
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Exception in getting Scheduled Notifiaction: {error message  here}
+  /history:
+    get:
+      tags:
+        - Notification History Controller
+      summary: Get All Notification History
+      description: This endpoint is responsible for getting all notification history by search specification and page.
+      operationId: getAllNotificationHistory
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Success Status with filtered Notification History page
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                content:
+                  - id: 1
+                    timestamp: '2024-06-20T13:18:50.802939'
+                    templateName: template1
+                    templatePlaceHolders: null
+                    sender: null
+                    group: group2
+                    notificationType: EMAIL
+                    description: null
+                    notificationDetails: []
+                  - id: 52
+                    timestamp: '2024-06-20T13:23:11.425182'
+                    templateName: template1
+                    templatePlaceHolders: null
+                    sender: null
+                    group: group2
+                    notificationType: EMAIL
+                    description: null
+                    notificationDetails: []
+                  - id: 102
+                    timestamp: '2024-06-20T13:37:28.594034'
+                    templateName: template1
+                    templatePlaceHolders: null
+                    sender: null
+                    group: group2
+                    notificationType: EMAIL
+                    description: null
+                    notificationDetails: []
+                pageable:
+                  sort:
+                    empty: false
+                    sorted: true
+                    unsorted: false
+                  offset: 0
+                  pageSize: 3
+                  pageNumber: 0
+                  paged: true
+                  unpaged: false
+                last: false
+                totalElements: 453
+                totalPages: 151
+                size: 3
+                number: 0
+                sort:
+                  empty: false
+                  sorted: true
+                  unsorted: false
+                first: true
+                numberOfElements: 3
+                empty: false
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error Retrieving Notification History: {error message  here}
+  /history/{id}:
+    get:
+      tags:
+        - Notification History Controller
+      summary: Get Notification History by id
+      description: This endpoint is responsible for getting notification History by Id.
+      operationId: getNotificationHistoryById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success Status with Notification History Entity
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 52
+                timestamp: '2024-06-20T13:23:11.425182'
+                templateName: template1
+                templatePlaceHolders: null
+                sender: null
+                group: group2
+                notificationType: EMAIL
+                description: null
+                notificationDetails: []
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Exception Status with message.
+          content:
+            application/json:
+              schema:
+                type: string
+              example: null
+  /history/query:
+    get:
+      tags:
+        - Notification History Controller
+      summary: 'All Notification History '
+      description: This endpoint is responsible for getting all notification history by search specification and page.
+      operationId: getAll_1
+      parameters:
+        - name: spec
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/SpecificationNotificationHistory'
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Success Status with filtered Notification History page
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                content:
+                  - id: 1
+                    timestamp: '2024-06-20T13:18:50.802939'
+                    templateName: template1
+                    templatePlaceHolders: null
+                    sender: null
+                    group: group2
+                    notificationType: EMAIL
+                    description: null
+                    notificationDetails: []
+                  - id: 52
+                    timestamp: '2024-06-20T13:23:11.425182'
+                    templateName: template1
+                    templatePlaceHolders: null
+                    sender: null
+                    group: group2
+                    notificationType: EMAIL
+                    description: null
+                    notificationDetails: []
+                  - id: 102
+                    timestamp: '2024-06-20T13:37:28.594034'
+                    templateName: template1
+                    templatePlaceHolders: null
+                    sender: null
+                    group: group2
+                    notificationType: EMAIL
+                    description: null
+                    notificationDetails: []
+                pageable:
+                  sort:
+                    empty: false
+                    sorted: true
+                    unsorted: false
+                  offset: 0
+                  pageSize: 3
+                  pageNumber: 0
+                  paged: true
+                  unpaged: false
+                last: false
+                totalElements: 453
+                totalPages: 151
+                size: 3
+                number: 0
+                sort:
+                  empty: false
+                  sorted: true
+                  unsorted: false
+                first: true
+                numberOfElements: 3
+                empty: false
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error Retrieving Notification History: {error message  here}
+  /history/details:
+    get:
+      tags:
+        - Notification Controller
+      summary: Get all Notification Details
+      description: This method is used to get all notification details by page and search by query.
+      operationId: getAllNotificationDetails
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Success Response with a Page of Notification Details
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                content:
+                  - id: 303
+                    destination: muhammad.@arslansigma-emea.com
+                    subject: heelo
+                    retries: 1
+                    status: FAILED
+                    description: C:\Projects\Dot-Project\files\scheduled\attachements;19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                    timestamp: '2024-06-24T11:21:01'
+                  - id: 304
+                    destination: asad.munir@sigma-emea.com
+                    subject: heelo
+                    retries: 1
+                    status: FAILED
+                    description: C:\Projects\Dot-Project\files\scheduled\attachements;19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                    timestamp: '2024-06-24T11:21:01'
+                  - id: 302
+                    destination: kashan.asim@sigma-emea.com
+                    subject: heelo
+                    retries: 1
+                    status: FAILED
+                    description: C:\Projects\Dot-Project\files\scheduled\attachements;19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                    timestamp: '2024-06-24T11:21:01'
+                pageable:
+                  sort:
+                    empty: false
+                    sorted: true
+                    unsorted: false
+                  offset: 0
+                  pageNumber: 0
+                  pageSize: 3
+                  paged: true
+                  unpaged: false
+                last: false
+                totalElements: 521
+                totalPages: 174
+                size: 3
+                number: 0
+                sort:
+                  empty: false
+                  sorted: true
+                  unsorted: false
+                first: true
+                numberOfElements: 3
+                empty: false
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error retrieving Notification Details: {error message here}
+  /history/details/{id}:
+    get:
+      tags:
+        - Notification Controller
+      summary: Notification Detail By Id
+      description: This endpoint is responsible for getting notification detail by id.
+      operationId: getNotificationDetailById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success Status with notification detail response.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 304
+                destination: asad.munir@sigma-emea.com
+                subject: heelo
+                retries: 1
+                status: FAILED
+                description: C:\Projects\Dot-Project\files\scheduled\attachements;19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                timestamp: '2024-06-24T11:21:01'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Exception Status with message.
+          content:
+            application/json:
+              schema:
+                type: string
+              example: null
+  /history/details/query:
+    get:
+      tags:
+        - Notification Controller
+      summary: Get All Notification Details
+      description: This endpoint is responsible for getting all notification details by search specification and page.
+      operationId: getAll_2
+      parameters:
+        - name: spec
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/SpecificationNotificationDetails'
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Success Status with Page of Filtered Notification Details
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                content:
+                  - id: 303
+                    destination: muhammad.@arslansigma-emea.com
+                    subject: heelo
+                    retries: 1
+                    status: FAILED
+                    description: C:\Projects\Dot-Project\files\scheduled\attachements;19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                    timestamp: '2024-06-24T11:21:01'
+                  - id: 304
+                    destination: asad.munir@sigma-emea.com
+                    subject: heelo
+                    retries: 1
+                    status: FAILED
+                    description: C:\Projects\Dot-Project\files\scheduled\attachements;19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                    timestamp: '2024-06-24T11:21:01'
+                  - id: 302
+                    destination: kashan.asim@sigma-emea.com
+                    subject: heelo
+                    retries: 1
+                    status: FAILED
+                    description: C:\Projects\Dot-Project\files\scheduled\attachements;19085349-8e45-4f5c-bfe0-c9514ffe2441.pdf
+                    timestamp: '2024-06-24T11:21:01'
+                pageable:
+                  sort:
+                    empty: false
+                    sorted: true
+                    unsorted: false
+                  offset: 0
+                  pageNumber: 0
+                  pageSize: 3
+                  paged: true
+                  unpaged: false
+                last: false
+                totalElements: 521
+                totalPages: 174
+                size: 3
+                number: 0
+                sort:
+                  empty: false
+                  sorted: true
+                  unsorted: false
+                first: true
+                numberOfElements: 3
+                empty: false
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error Retrieving notification Details: {error message  here}
+  /history/count:
+    get:
+      tags:
+        - Notification History Controller
+      summary: Notification Count by Type
+      description: This endpoint is responsible for getting notification count by notification type.
+      operationId: getNotificationCountByNotificationType
+      parameters:
+        - name: notificationType
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - SMS
+              - EMAIL
+              - FCM
+      responses:
+        '200':
+          description: Success Status
+          content:
+            text/plain:
+              schema:
+                type: integer
+              example: 526
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        FCM token not found with id: {error message  here}
+  /fcm/token:
+    get:
+      tags:
+        - FCM Notification Controller
+      summary: Get All FCM Tokens
+      description: This endpoint is responsible for getting all FCM tokens by page and sort.
+      operationId: getAllTokens
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Success Status with Token Page Response
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                - id: 6
+                  msisdn: 436-934-3768
+                  token: HHy5zlMI5MYPlfo
+                  active: true
+                  timestamp: '2024-06-23T12:16:23.717645'
+                - id: 7
+                  msisdn: 240-882-1541
+                  token: LA7nJoEvKaGV041
+                  active: true
+                  timestamp: '2024-06-23T12:16:24.848049'
+                - id: 8
+                  msisdn: 844-799-3758
+                  token: pFVA2E49usD70DP
+                  active: true
+                  timestamp: '2024-06-23T12:16:25.780158'
+                - id: 9
+                  msisdn: 437-972-3030
+                  token: q31xifmB5635W5r
+                  active: true
+                  timestamp: '2024-06-23T12:16:26.749346'
+                - id: 10
+                  msisdn: 412-511-7863
+                  token: j0hh8cjdzYq7fd5
+                  active: true
+                  timestamp: '2024-06-23T12:16:27.733296'
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error Retrieving Tokens: {error message  here}
+  /fcm/token/query:
+    get:
+      tags:
+        - FCM Notification Controller
+      summary: Search FCM Token
+      description: This endpoint is responsible for searching FCM tokens.
+      operationId: search_2
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success Status with List of Tokens
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                - id: 61
+                  msisdn: 436-934-3768
+                  token: HHy5zlMI5MYPlfo
+                  active: true
+                  timestamp: '2024-06-23T12:16:23.717645'
+                - id: 37
+                  msisdn: 240-882-1541
+                  token: LA7nJoEvKaGV041
+                  active: true
+                  timestamp: '2024-06-23T12:16:24.848049'
+                - id: 238
+                  msisdn: 844-799-3758
+                  token: pFVA2E49usD70DP
+                  active: true
+                  timestamp: '2024-06-23T12:16:25.780158'
+                - id: 94
+                  msisdn: 437-972-3030
+                  token: q31xifmB5635W5r
+                  active: true
+                  timestamp: '2024-06-23T12:16:26.749346'
+                - id: 515
+                  msisdn: 412-511-7863
+                  token: j0hh8cjdzYq7fd5
+                  active: true
+                  timestamp: '2024-06-23T12:16:27.733296'
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |2
+                        Error searching Request: {error message  here}
+  /cache/configs/search:
+    get:
+      tags:
+        - Cache Config Controller
+      summary: Cache Config by Name or Service
+      description: This endpoint is responsible for Cache Config by name and service.
+      operationId: getCacheConfigByNameAndMicroservice
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: microservice
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CacheConfig'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+  /cache/configs/name/{name}:
+    get:
+      tags:
+        - Cache Config Controller
+      summary: Cache Config by Name
+      description: This endpoint is responsible for getting Cache Config by Name.
+      operationId: getCacheConfigByName
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CacheConfig'
+        '400':
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+  /fcm/token/{id}:
+    delete:
+      tags:
+        - FCM Notification Controller
+      summary: Delete FCM Token
+      description: This endpoint is responsible for deleting FCM token.
+      operationId: deleteToken
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success Status
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Sending PUSH Notifications ...
+        '400':
+          description: Exception Status with message.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |
+                FCM token not found with id: {error message  here}
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+    TemplateDTO:
+      type: object
+      properties:
+        templateId:
+          type: integer
+          format: int64
+        templateName:
+          type: string
+        template:
+          type: string
+        notificationType:
+          type: string
+          enum:
+            - SMS
+            - EMAIL
+            - FCM
+        timestamp:
+          type: string
+    ScheduledNotification:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+        group:
+          type: string
+        templateName:
+          type: string
+        templatePlaceHolders:
+          type: object
+          $ref: '#/components/schemas/TemplatePlaceHolders'
+        active:
+          type: boolean
+        notificationType:
+          type: string
+          enum:
+            - SMS
+            - EMAIL
+            - FCM
+        notificationIsExecuted:
+          type: boolean
+        executionTime:
+          type: string
+        notificationIsRecursive:
+          type: boolean
+        subject:
+          type: string
+        attachement:
+          type: string
+        attachmentName:
+          type: string
+    FcmTokenDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        msisdn:
+          type: string
+        token:
+          type: string
+        active:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+    CacheConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        duration:
+          type: integer
+          format: int32
+        microservice:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    ConditionalNotification:
+      type: object
+      properties:
+        table:
+          type: string
+        conditions:
+          $ref: '#/components/schemas/Conditions'
+    Conditions:
+      type: object
+      properties:
+        where:
+          type: array
+          items:
+            type: string
+    SMSRequestDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        to:
+          type: string
+        message:
+          type: string
+        groupName:
+          type: string
+        templateName:
+          type: string
+        templatePlaceHolders:
+          type: object
+          $ref: '#/components/schemas/TemplatePlaceHolders'
+        conditionalNotification:
+          $ref: '#/components/schemas/ConditionalNotification'
+    ScheduledNotificationDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+        group:
+          type: string
+        templateName:
+          type: string
+        templatePlaceHolders:
+          type: object
+          $ref: '#/components/schemas/TemplatePlaceHolders'
+        active:
+          type: boolean
+        notificationType:
+          type: string
+          enum:
+            - SMS
+            - EMAIL
+            - FCM
+        notificationIsExecuted:
+          type: boolean
+        executionTime:
+          type: string
+        notificationIsRecursive:
+          type: boolean
+        subject:
+          type: string
+    FCMNotificationRequestDTO:
+      required:
+        - title
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        groupName:
+          type: string
+        userId:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        templateName:
+          type: string
+        templatePlaceHolders:
+          type: object
+          $ref: '#/components/schemas/TemplatePlaceHolders'
+        conditionalNotification:
+          $ref: '#/components/schemas/ConditionalNotification'
+        data:
+          type: object
+          additionalProperties:
+            type: string
+    EmailNotificationDTO:
+      required:
+        - subject
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        to:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+        groupName:
+          type: string
+        templateName:
+          type: string
+        templatePlaceHolders:
+          type: object
+          $ref: '#/components/schemas/TemplatePlaceHolders'
+        conditionalNotification:
+          $ref: '#/components/schemas/ConditionalNotification'
+        attachmentPath:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileData'
+    FileData:
+      type: object
+      properties:
+        fileName:
+          type: string
+        fileContent:
+          type: string
+    TemplatePlaceHolders:
+      type: object
+      properties:
+        placeHolder1:
+          type: string
+        placeHolder2:
+          type: string
+    Pageable:
+      type: object
+      properties:
+        page:
+          minimum: 0
+          type: integer
+          format: int32
+        size:
+          minimum: 1
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            type: string
+    SpecificationTemplate:
+      type: object
+    SpecificationNotificationHistory:
+      type: object
+    SpecificationNotificationDetails:
+      type: object
